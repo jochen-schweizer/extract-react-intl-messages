@@ -80,7 +80,7 @@ module.exports = async (locales, pattern, buildDir, opts) => {
 
   const ext = isJson(opts.format) ? 'json' : 'yml'
 
-  const { defaultLocale, moduleName } = opts
+  const { defaultLocale, moduleName, babelConfig } = opts
 
   const delimiter = opts.delimiter ? opts.delimiter : '.'
 
@@ -90,6 +90,10 @@ module.exports = async (locales, pattern, buildDir, opts) => {
 
   if (moduleName) {
     extractorOptions.moduleSourceName = moduleName
+  }
+
+  if (babelConfig) {
+    extractorOptions.babelConfig = babelConfig
   }
 
   const newLocaleMaps = await extractReactIntl(

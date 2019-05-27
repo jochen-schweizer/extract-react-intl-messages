@@ -36,7 +36,7 @@
     "messages"
   ],
   "dependencies": {
-    "extract-react-intl": "^0.9.0",
+    "extract-react-intl": "git://github.com/jochen-schweizer/extract-react-intl.git",
     "flat": "^4.1.0",
     "js-yaml": "^3.12.1",
     "load-json-file": "^5.1.0",
