@@ -73,14 +73,14 @@ module.exports = async (locales, pattern, buildDir, opts) => {
 
   const jsonOpts = { format: 'json', flat: true }
   const yamlOpts = { format: 'yaml', flat: false }
-  const defautlOpts =
+  const defaultOpts =
     opts && opts.format && !isJson(opts.format) ? yamlOpts : jsonOpts
 
-  opts = { defaultLocale: 'en', ...defautlOpts, ...opts }
+  opts = { defaultLocale: 'en', ...defaultOpts, ...opts }
 
   const ext = isJson(opts.format) ? 'json' : 'yml'
 
-  const { defaultLocale, moduleName, babelConfig } = opts
+  const { defaultLocale, moduleName, babelConfig, validateOnly } = opts
 
   const delimiter = opts.delimiter ? opts.delimiter : '.'
 
@@ -102,6 +102,29 @@ module.exports = async (locales, pattern, buildDir, opts) => {
     extractorOptions
   )
 
+  if (validateOnly) {
+    locales.forEach(locale => {
+      const newLocaleMessageIds = Object.keys(newLocaleMaps[locale])
+      newLocaleMessageIds.sort()
+      const oldLocaleMessageIds = Object.keys(oldLocaleMaps[locale])
+      oldLocaleMessageIds.sort()
+      if (
+        newLocaleMessageIds.length !== oldLocaleMessageIds.length ||
+        !newLocaleMessageIds.every(
+          (_, index) =>
+            newLocaleMessageIds[index] === oldLocaleMessageIds[index]
+        )
+      ) {
+        return Promise.reject(
+          new Error(
+            'Message IDs in message files are not up to date with extracted IDs'
+          )
+        )
+      }
+    })
+    return Promise.resolve()
+  }
+
   return Promise.all(
     locales.map(locale => {
       // If the default locale, overwrite the origin file
@@ -113,13 +136,13 @@ module.exports = async (locales, pattern, buildDir, opts) => {
       // Only keep existing keys
       localeMap = pick(localeMap, Object.keys(newLocaleMaps[locale]))
 
-      const fomattedLocaleMap = opts.flat
+      const formattedLocaleMap = opts.flat
         ? sortKeys(localeMap, { deep: true })
         : unflatten(sortKeys(localeMap), { delimiter, object: true })
 
       const fn = isJson(opts.format) ? writeJson : writeYaml
 
-      return fn(path.resolve(buildDir, locale), fomattedLocaleMap)
+      return fn(path.resolve(buildDir, locale), formattedLocaleMap)
     })
   )
 }
