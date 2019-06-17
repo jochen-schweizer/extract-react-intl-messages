@@ -115,11 +115,11 @@ module.exports = async (locales, pattern, buildDir, opts) => {
             newLocaleMessageIds[index] === oldLocaleMessageIds[index]
         )
       ) {
-        return Promise.reject(
-          new Error(
-            'Message IDs in message files are not up to date with extracted IDs'
-          )
+        const invalidMessageIdsError = new Error(
+          'Message IDs in message files are not up to date with extracted IDs'
         )
+        invalidMessageIdsError.code = 'EMSGID'
+        return Promise.reject(invalidMessageIdsError)
       }
     })
     return Promise.resolve()
